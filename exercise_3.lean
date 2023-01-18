@@ -1,4 +1,4 @@
-import .base_language
+import .base_language .typing_rules
 
 /-
 # Exercise 3
@@ -59,7 +59,7 @@ def eq_nat : exp :=
         )
     )
 -- Write down the typing judgment as a lemma in Lean and prove it.
-lemma l_eq_nat : -- ℚ: Doe it need to only prove the typing judgement or also that the function actually compares for equality?
+lemma l_eq_nat : -- ℚ: Does it need to only prove the typing judgement or also that the function actually compares for equality?
   typed Γ (eq_nat f_eq_nat x y) (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) := sorry
 
 ------------

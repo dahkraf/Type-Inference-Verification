@@ -8,7 +8,7 @@ Translate the following typing judgments into lemmas in Lean and prove them.
 constants (Γ : ctx) (f x : string)
 
 -- ⊢ (λ(x : ℕ). x) : ℕ → ℕ
-lemma l₁ : typed Γ (exp.ELam x ty.TNat (exp.EVar x)) (ty.TFun ty.TNat ty.TNat) := -- ℚ: What can/cannot a lemma take as an argument? (Γ, x, etc.)
+lemma l₁ : typed Γ (exp.ELam x ty.TNat (exp.EVar x)) (ty.TFun ty.TNat ty.TNat) :=
   typed.Lam_typed
     Γ
     x
@@ -20,7 +20,7 @@ lemma l₁ : typed Γ (exp.ELam x ty.TNat (exp.EVar x)) (ty.TFun ty.TNat ty.TNat
         (ctx.ctx_snoc Γ x ty.TNat)
         x
         ty.TNat
-        refl -- ?
+        sorry -- ?
     )
 -- ⊢ (λ(x : ℕ). is_zero) : ℕ → ℕ → Bool
 lemma l₂ : typed Γ (exp.ELam x ty.TNat (exp.EIsZero)) (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) :=
@@ -55,9 +55,17 @@ lemma l₃ :
                   exp.ESucc
                   (exp.EApp (exp.EVar f) (exp.EApp exp.EPred (exp.EVar x)))
               )
-          ) -- ℚ: How to apply successor/predecessor?
+          )
       )
   ) 
   (ty.TFun ty.TNat ty.TNat):=
-  sorry
+  typed.Rec_typed
+    Γ
+    f
+    x
+    ty.TNat
+    ty.TNat
+    sorry -- How to seperate the expression in the lemma into a def? Lean complains in that case.
+    sorry
+    
 ------------

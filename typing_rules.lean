@@ -33,7 +33,7 @@ inductive typed : ctx → exp → ty → Prop
 | IsZero_typed (Γ : ctx) : typed Γ (exp.EIsZero) (ty.TFun ty.TNat ty.TBool)
 -- ℚ: What does EIsZero represent? Is it a function of type TNat → TBool?
 -- Pairing:
-| Pair_typed (Γ : ctx) (A B : ty) : typed Γ (exp.EPair) (ty.TFun A (ty.TFun B (ty.TProd A B))) -- Is using TFun's necessary to have partial application of EPair?
-| Fst_typed (Γ : ctx) (A B : ty) : typed Γ (exp.EFst) (ty.TFun (ty.TProd A B) A)
-| Snd_typed (Γ : ctx) (A B : ty) : typed Γ (exp.ESnd) (ty.TFun (ty.TProd A B) B)
+-- | Pair_typed (Γ : ctx) (A B : ty) : typed Γ (exp.EPair) (ty.TFun A (ty.TFun B (ty.TProd A B))) -- Is using TFun's necessary to have partial application of EPair?
+-- | Fst_typed (Γ : ctx) (A B : ty) : typed Γ (exp.EFst) (ty.TFun (ty.TProd A B) A)
+-- | Snd_typed (Γ : ctx) (A B : ty) : typed Γ (exp.ESnd) (ty.TFun (ty.TProd A B) B)
 -------------
