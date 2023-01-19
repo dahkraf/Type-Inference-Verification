@@ -6,7 +6,7 @@ Represent the typing judgment Γ ⊢ e : A as an inductively defined proposition
 -/
 inductive typed : ctx → exp → ty → Prop
 | Var_typed (Γ : ctx) (x : string) (A : ty)
-            (p : ctx_lookup x Γ = option.some A) : typed Γ (exp.EVar x) A -- ℚ: How does the inductive type definition work here? Does each constructor need to provide a function "typed" or a Prop?
+            (p : ctx_lookup x Γ = option.some A) : typed Γ (exp.EVar x) A
 -- Lamda expression:
 | Lam_typed (Γ : ctx) (x : string) (A B : ty) (e : exp) -- ℚ: Does Lam require the output type B to match up with the declared type B? Does it even need the declared type?
             (p : typed Γ e B) : typed Γ (exp.ELam x A e) (ty.TFun A B)
