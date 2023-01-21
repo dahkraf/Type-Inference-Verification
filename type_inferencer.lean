@@ -4,7 +4,8 @@ import .base_language
 # Exercise 4
 Implement a type inferencer.
 -/
-def type_infer : ctx → exp → option ty :=
+-- variable type_infer : ctx → exp → option ty -- Would this work?
+def type_infer: ctx → exp → option ty :=
   λ Γ : ctx,
     λ e,
       match e with
@@ -32,5 +33,4 @@ def type_infer : ctx → exp → option ty :=
         | (exp.ESnd e) := sorry
         | _ := none
       end
-
 ------------

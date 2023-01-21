@@ -18,10 +18,10 @@ inductive exp : Type
 | EFalse : exp
 | EIf (e1 e2 e3 : exp) : exp
 | Ezero : exp
-| ESucc : exp -- ℚ: Why do the successor/predecessor constructor not take another expression as an argument? (I think ESucc is treated as a function in the object language)
+| ESucc : exp
 | EPred : exp
 | EIsZero : exp
-| EPair (e1 e2 : exp) : exp -- arguments seem necessary for the pairing cases
+| EPair : exp → exp → exp -- arguments seem necessary for the pairing cases
 | EFst (e : exp) : exp
 | ESnd (e : exp) : exp
 -- Define language context:

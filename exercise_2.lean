@@ -16,7 +16,7 @@ lemma l₁ : typed Γ (exp.ELam x ty.TNat (exp.EVar x)) (ty.TFun ty.TNat ty.TNat
     ty.TNat -- ℚ: Can these arguments be set to TNat directly or need to be inferred somehow?
     (exp.EVar x)
     (
-      typed.Var_typed -- ?
+      typed.Var_typed
         (ctx.ctx_snoc Γ x ty.TNat)
         x
         ty.TNat
@@ -32,13 +32,11 @@ lemma l₂ : typed Γ (exp.ELam x ty.TNat (exp.EIsZero)) (ty.TFun ty.TNat (ty.TF
     (exp.EIsZero)
     (
       typed.IsZero_typed
-        Γ
+        (ctx.ctx_snoc Γ x ty.TNat)
     )
 -- ⊢ (rec f (x : ℕ) : ℕ := if (is_zero x) then 0 else (succ (succ (f (pred x))))) : ℕ → ℕ
-lemma l₃ :
-  typed Γ
-  (
-    exp.ERec
+noncomputable def exp₃ : exp :=
+  exp.ERec
       f
       x
       ty.TNat
@@ -57,8 +55,8 @@ lemma l₃ :
               )
           )
       )
-  ) 
-  (ty.TFun ty.TNat ty.TNat):=
+def type₃ : ty := ty.TFun ty.TNat ty.TNat
+lemma l₃ : typed Γ exp₃ type₃ :=
   typed.Rec_typed
     Γ
     f
