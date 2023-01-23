@@ -9,7 +9,7 @@ inductive typed : ctx → exp → ty → Prop
             (p : ctx_lookup x Γ = option.some A) : typed Γ (exp.EVar x) A
 -- Lamda expression:
 | Lam_typed (Γ : ctx) (x : string) (A B : ty) (e : exp) -- ℚ: Does Lam require the output type B to match up with the declared type B? Does it even need the declared type?
-            (p : typed (ctx.ctx_snoc Γ x A) e B) : typed Γ (exp.ELam x A e) (ty.TFun A B)
+            (p : typed (ctx.ctx_snoc Γ x A) e B) : typed Γ (exp.ELam x A e) (ty.TFun A B) -- ℚ: How can the new context Γ₂ := ctx.ctx_snoc Γ x A be placed as an argument to declutter the proposition p?
 -- Recursive function:
 | Rec_typed (Γ : ctx) (f x : string) (A B : ty) (e : exp)
             (p : typed (ctx.ctx_snoc (ctx.ctx_snoc Γ x A) f (ty.TFun A B)) e B) : typed Γ (exp.ERec f x A B e) (ty.TFun A B)

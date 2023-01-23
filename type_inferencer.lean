@@ -5,32 +5,42 @@ import .base_language
 Implement a type inferencer.
 -/
 -- variable type_infer : ctx → exp → option ty -- Would this work?
-def type_infer: ctx → exp → option ty :=
-  λ Γ : ctx,
-    λ e,
-      match e with
-        | (exp.EVar x) := ctx_lookup x Γ
-        -- These cause issues with unidentified "type_infer" call: -- ℚ: How to fix it if I need recursion to descend the AST?
-        -- | (exp.ELam x A e) := bind (type_infer ctx.ctx_nil e) (λ o, ty.TFun A o) -- need monads to wrap/unwrap types inside "option"
-        -- | (exp.ERec f x A B e) := bind (type_infer ctx.ctx_nil e) (λ o, ty.TFun A o) -- add a check against declared output type B
-        -- | (exp.EApp e1 e2) := let input_type := (type_infer ctx.ctx_nil e2) in
-        --                       match (type_infer ctx.ctx_nil e1) with
-        --                       | (some (ty.TFun A B)) := (match input_type with
-        --                                                 | (some T) := if (A = T) then (some B) else none
-        --                                                 | _ := none
-        --                                                 end
-        --                       )
-        --                       | _ := none
-        --                       end
-        | (exp.ETrue) := some ty.TBool
-        | (exp.EFalse) := some ty.TBool
-        | (exp.Ezero) := some ty.TNat
-        | (exp.ESucc) := some (ty.TFun ty.TNat ty.TNat)
-        | (exp.EPred) := some (ty.TFun ty.TNat ty.TNat)
-        | (exp.EIsZero) := some (ty.TFun ty.TNat ty.TBool)
-        | (exp.EPair e1 e2) := sorry -- some (ty.TFun A (ty.TFun B (ty.TProd A B))) -- Here, having e1 and e2 as arguments seems necessary, because the overall type depends on the arguments (unlike in ESucc)
-        | (exp.EFst e) := sorry
-        | (exp.ESnd e) := sorry
-        | _ := none
-      end
+def type_infer : ctx → exp → option ty
+| Γ (exp.EVar x) := ctx_lookup x Γ
+-- These cause issues with unidentified "type_infer" call:
+| Γ (exp.ELam x A e) := let Γ' : ctx := (ctx.ctx_snoc Γ x A) in
+                        bind (type_infer Γ' e) (λ o, ty.TFun A o) -- need monads to wrap/unwrap types inside "option"
+| Γ (exp.ERec f x A B e) := let Γ' : ctx := (ctx.ctx_snoc (ctx.ctx_snoc Γ x A) f (ty.TFun A B)) in
+                            bind (type_infer Γ' e) (λ o, ty.TFun A o) -- add a check against declared output type B
+| Γ (exp.EApp e1 e2) := let input_type : option ty := (type_infer Γ e2) in
+                        let output_type : option ty := (type_infer Γ e1) in
+                        match output_type with
+                        | (some (ty.TFun A B)) :=
+                            match input_type with
+                            | (some T) := if (A = T) then (some B) else none -- ℚ: How to define deiceability over inductive type ty?
+                            | _ := none                                      -- ℚ: How to check types for equality (A = T)?
+                            end
+                        | _ := none
+                        end
+| Γ (exp.ETrue) := some ty.TBool
+| Γ (exp.EFalse) := some ty.TBool
+| Γ (exp.EIf e1 e2 e3) := let cond_type : option ty := (type_infer Γ e1) in
+                          let if_branch_type : option ty := (type_infer Γ e2) in
+                          let else_branch_type : option ty := (type_infer Γ e3) in
+                          match cond_type with
+                          | (some ty.TBool) :=
+                              match if_branch_type, else_branch_type with
+                              | (some A), (some B) := if (A = B) then (some A) else none -- same issue as in EApp
+                              | _, _ := none
+                              end
+                          | _ := none
+                          end
+| Γ (exp.Ezero) := some ty.TNat
+| Γ (exp.ESucc) := some (ty.TFun ty.TNat ty.TNat)
+| Γ (exp.EPred) := some (ty.TFun ty.TNat ty.TNat)
+| Γ (exp.EIsZero) := some (ty.TFun ty.TNat ty.TBool)
+| Γ (exp.EPair e1 e2) := sorry -- some (ty.TFun A (ty.TFun B (ty.TProd A B))) -- Here, having e1 and e2 as arguments seems necessary, because the overall type depends on the arguments (unlike in ESucc)
+| Γ (exp.EFst e) := sorry
+| Γ (exp.ESnd e) := sorry
+| Γ _ := none
 ------------

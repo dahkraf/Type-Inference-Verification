@@ -20,7 +20,17 @@ lemma l₁ : typed Γ (exp.ELam x ty.TNat (exp.EVar x)) (ty.TFun ty.TNat ty.TNat
         (ctx.ctx_snoc Γ x ty.TNat)
         x
         ty.TNat
-        sorry -- ?
+        (
+          let h₁ : ctx_lookup x (Γ.ctx_snoc x ty.TNat) = if x = x then option.some ty.TNat else ctx_lookup x Γ
+              := eq.refl _ in
+          -- let h_dec : decidable (x = x)
+          --     := string.has_decidable_eq x x in
+          let h₂ : x = x -- ℚ: How does this compare with having a proposition (x = x) = true instead?
+              := eq.refl _ in
+          let h₃ : (if x = x then option.some ty.TNat else ctx_lookup x Γ) = option.some ty.TNat
+              := by rw [if_pos h₂] in
+          eq.trans h₁ h₃
+        )
     )
 -- ⊢ (λ(x : ℕ). is_zero) : ℕ → ℕ → Bool
 lemma l₂ : typed Γ (exp.ELam x ty.TNat (exp.EIsZero)) (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) :=
@@ -63,7 +73,37 @@ lemma l₃ : typed Γ exp₃ type₃ :=
     x
     ty.TNat
     ty.TNat
-    sorry -- How to seperate the expression in the lemma into a def? Lean complains in that case.
-    sorry
-    
+    (
+      exp.EIf
+        (exp.EApp exp.EIsZero (exp.EVar x))
+        exp.Ezero
+        (
+          exp.EApp
+            exp.ESucc
+            (
+              exp.EApp
+                exp.ESucc
+                (exp.EApp (exp.EVar f) (exp.EApp exp.EPred (exp.EVar x)))
+            )
+        )
+    )
+    (
+      typed.EIf_typed
+        Γ
+        (exp.EApp exp.EIsZero (exp.EVar x))
+        (exp.Ezero)
+        (
+          exp.EApp
+            exp.ESucc
+            (
+              exp.EApp
+                exp.ESucc
+                (exp.EApp (exp.EVar f) (exp.EApp exp.EPred (exp.EVar x)))
+            )
+        )
+        ty.TNat
+        sorry
+        (typed.Zero_typed)
+        sorry
+    )
 ------------
