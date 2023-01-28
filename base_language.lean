@@ -21,7 +21,7 @@ inductive exp : Type
 | ESucc : exp
 | EPred : exp
 | EIsZero : exp
-| EPair : exp → exp → exp -- arguments seem necessary for the pairing cases
+| EPair (e1 e2 : exp) : exp
 | EFst (e : exp) : exp
 | ESnd (e : exp) : exp
 -- Define language context:

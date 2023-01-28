@@ -32,7 +32,9 @@ inductive typed : ctx → exp → ty → Prop
 -- Is-zero:
 | IsZero_typed (Γ : ctx) : typed Γ (exp.EIsZero) (ty.TFun ty.TNat ty.TBool)
 -- Pairing:
--- | Pair_typed (Γ : ctx) (A B : ty) : typed Γ (exp.EPair) (ty.TFun A (ty.TFun B (ty.TProd A B))) -- Is using TFun's necessary to have partial application of EPair?
--- | Fst_typed (Γ : ctx) (A B : ty) : typed Γ (exp.EFst) (ty.TFun (ty.TProd A B) A)
--- | Snd_typed (Γ : ctx) (A B : ty) : typed Γ (exp.ESnd) (ty.TFun (ty.TProd A B) B)
+| Pair_typed (Γ : ctx) (e1 e2 : exp) (A B : ty) : typed Γ (exp.EPair e1 e2) (ty.TProd A B) -- Pairing without partial application
+| Fst_typed (Γ : ctx) (e : exp) (A B : ty)
+            (p : typed Γ e (ty.TProd A B)) : typed Γ (exp.EFst e) (ty.TFun (ty.TProd A B) A) -- Left projection is not a higher order function
+| Snd_typed (Γ : ctx) (e : exp) (A B : ty)
+            (p : typed Γ e (ty.TProd A B)) : typed Γ (exp.ESnd e) (ty.TFun (ty.TProd A B) B) -- Right projection is not a higher order function
 -------------

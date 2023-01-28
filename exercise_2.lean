@@ -22,13 +22,13 @@ lemma l₁ : typed Γ (exp.ELam x ty.TNat (exp.EVar x)) (ty.TFun ty.TNat ty.TNat
         ty.TNat
         (
           let h₁ : ctx_lookup x (Γ.ctx_snoc x ty.TNat) = if x = x then option.some ty.TNat else ctx_lookup x Γ
-              := eq.refl _ in
+              := rfl in
           -- let h_dec : decidable (x = x)
           --     := string.has_decidable_eq x x in
           let h₂ : x = x -- ℚ: How does this compare with having a proposition (x = x) = true instead?
-              := eq.refl _ in
+              := rfl in
           let h₃ : (if x = x then option.some ty.TNat else ctx_lookup x Γ) = option.some ty.TNat
-              := by rw [if_pos h₂] in
+              := by rw (if_pos h₂) in
           eq.trans h₁ h₃
         )
     )
@@ -88,8 +88,9 @@ lemma l₃ : typed Γ exp₃ type₃ :=
         )
     )
     (
+      let Γ' : ctx := (ctx.ctx_snoc (ctx.ctx_snoc Γ x ty.TNat) f (ty.TFun ty.TNat ty.TNat)) in
       typed.EIf_typed
-        Γ
+        Γ'
         (exp.EApp exp.EIsZero (exp.EVar x))
         (exp.Ezero)
         (
@@ -102,7 +103,16 @@ lemma l₃ : typed Γ exp₃ type₃ :=
             )
         )
         ty.TNat
-        sorry
+        (
+          typed.App_typed
+            Γ'
+            exp.EIsZero
+            (exp.EVar x)
+            ty.TNat
+            ty.TNat
+            sorry
+            sorry
+        )
         (typed.Zero_typed)
         sorry
     )

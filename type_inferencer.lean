@@ -4,10 +4,8 @@ import .base_language
 # Exercise 4
 Implement a type inferencer.
 -/
--- variable type_infer : ctx → exp → option ty -- Would this work?
-def type_infer : ctx → exp → option ty
+def type_infer [decidable_eq ty] : ctx → exp → option ty
 | Γ (exp.EVar x) := ctx_lookup x Γ
--- These cause issues with unidentified "type_infer" call:
 | Γ (exp.ELam x A e) := let Γ' : ctx := (ctx.ctx_snoc Γ x A) in
                         bind (type_infer Γ' e) (λ o, ty.TFun A o) -- need monads to wrap/unwrap types inside "option"
 | Γ (exp.ERec f x A B e) := let Γ' : ctx := (ctx.ctx_snoc (ctx.ctx_snoc Γ x A) f (ty.TFun A B)) in
@@ -39,8 +37,22 @@ def type_infer : ctx → exp → option ty
 | Γ (exp.ESucc) := some (ty.TFun ty.TNat ty.TNat)
 | Γ (exp.EPred) := some (ty.TFun ty.TNat ty.TNat)
 | Γ (exp.EIsZero) := some (ty.TFun ty.TNat ty.TBool)
-| Γ (exp.EPair e1 e2) := sorry -- some (ty.TFun A (ty.TFun B (ty.TProd A B))) -- Here, having e1 and e2 as arguments seems necessary, because the overall type depends on the arguments (unlike in ESucc)
-| Γ (exp.EFst e) := sorry
-| Γ (exp.ESnd e) := sorry
-| Γ _ := none
+| Γ (exp.EPair e1 e2) := let l_type : option ty := (type_infer Γ e1) in
+                         let r_type : option ty := (type_infer Γ e2) in
+                         match l_type, r_type with
+                         | (some A), (some B) := some (ty.TProd A B) -- Here, having e1 and e2 as arguments seems necessary, because the overall type depends on the arguments (unlike in ESucc)
+                         | _, _ := none
+                         end
+| Γ (exp.EFst e) := let pair_type : option ty := (type_infer Γ e) in
+                    match pair_type with
+                    | some (ty.TProd A B) := some A
+                    | _ := none
+                    end
+| Γ (exp.ESnd e) := let pair_type : option ty := (type_infer Γ e) in
+                    match pair_type with
+                    | some (ty.TProd A B) := some B
+                    | _ := none
+                    end
 ------------
+
+#eval type_infer (ctx.ctx_nil) (exp.ETrue) -- requires instance of decidable_eq ty
