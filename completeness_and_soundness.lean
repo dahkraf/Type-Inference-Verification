@@ -13,7 +13,11 @@ lemma type_infer_sound (Γ : ctx) (e : exp) (A : ty) : type_infer Γ e = option.
   λ e_inf : type_infer Γ e = option.some A,
     (
       match e with
-      | (exp.EVar x) := typed.Var_typed Γ x A (sorry)
+      | (exp.EVar x) :=
+          typed.Var_typed Γ x A
+          (
+            sorry
+          )
       | _ := sorry
       end
     )

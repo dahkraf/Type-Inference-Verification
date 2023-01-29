@@ -3,7 +3,7 @@
 -/
 
 -- Define language types:
-inductive ty : Type
+@[derive decidable_eq] inductive ty : Type -- "derive" tag automatically derives decidable equality
 | TNat : ty
 | TBool : ty
 | TFun : ty → ty → ty
@@ -34,26 +34,16 @@ def ctx_lookup (x : string) : ctx → option ty
 | ctx.ctx_nil          := option.none
 | (ctx.ctx_snoc Γ y A) := if y = x then option.some A else ctx_lookup Γ
 
--- Introduce decidability of equality over types "ty":
-instance decidable_eq_ty : decidable_eq ty :=
-  λ (A B : ty),
-    match A, B with
-    | ty.TNat, ty.TNat := is_true rfl
-    | ty.TBool, ty.TBool := is_true rfl
-    | (ty.TFun A B), (ty.TFun C D) := sorry
-    | (ty.TProd A B), (ty.TProd C D) := sorry
-    | x, y := is_false sorry
-    end
+-- Introduce decidability of equality over types "ty": (alternative to @[derive decidable_eq])
+/-
+  instance decidable_eq_ty : decidable_eq ty :=
+    λ (A B : ty),
+      match A, B with
+      | ty.TNat, ty.TNat := is_true rfl
+      | ty.TBool, ty.TBool := is_true rfl
+      | (ty.TFun A B), (ty.TFun C D) := sorry
+      | (ty.TProd A B), (ty.TProd C D) := sorry
+      | x, y := is_false sorry
+      end
+-/
 -------------
-
--- Introduce representabilit (string formatting) of types "ty"
--- instance has_repr_ty : has_repr ty := 
---   ⟨ 
---     λ (A : ty),
---     match A with
---     | ty.TNat := "TNat"
---     | ty.TBool := "TBool"
---     | (ty.TFun A B) := "TFun" ++ (sorry) ++ (sorry)
---     | (ty.TProd A B) := "TProd" ++ (sorry) ++ (sorry)
---     end
---   ⟩ 
