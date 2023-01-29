@@ -5,7 +5,19 @@ import .base_language .typing_rules
 Translate the following typing judgments into lemmas in Lean and prove them.
 -/
 
-constants (Γ : ctx) (f x : string)
+constants (Γ : ctx) (f x y : string) (A B C: ty)
+
+lemma immediate_context (A : ty) : ctx_lookup x (ctx.ctx_snoc Γ x A) = some A :=
+  let h₁ : ctx_lookup x (ctx.ctx_snoc Γ x A) = if x = x then option.some A else ctx_lookup x Γ
+      := rfl in
+  let h₂ : x = x
+      := rfl in
+  let h₃ : (if x = x then option.some A else ctx_lookup x Γ) = some A
+      := by rw (if_pos h₂) in
+  eq.trans h₁ h₃
+
+lemma ctx_order_exchangability : (Γ.ctx_snoc x A).ctx_snoc y B = (Γ.ctx_snoc y B).ctx_snoc x A :=
+  sorry
 
 -- ⊢ (λ(x : ℕ). x) : ℕ → ℕ
 lemma l₁ : typed Γ (exp.ELam x ty.TNat (exp.EVar x)) (ty.TFun ty.TNat ty.TNat) :=
@@ -32,6 +44,7 @@ lemma l₁ : typed Γ (exp.ELam x ty.TNat (exp.EVar x)) (ty.TFun ty.TNat ty.TNat
           eq.trans h₁ h₃
         )
     )
+
 -- ⊢ (λ(x : ℕ). is_zero) : ℕ → ℕ → Bool
 lemma l₂ : typed Γ (exp.ELam x ty.TNat (exp.EIsZero)) (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) :=
   typed.Lam_typed
@@ -44,6 +57,7 @@ lemma l₂ : typed Γ (exp.ELam x ty.TNat (exp.EIsZero)) (ty.TFun ty.TNat (ty.TF
       typed.IsZero_typed
         (ctx.ctx_snoc Γ x ty.TNat)
     )
+
 -- ⊢ (rec f (x : ℕ) : ℕ := if (is_zero x) then 0 else (succ (succ (f (pred x))))) : ℕ → ℕ
 noncomputable def exp₃ : exp :=
   exp.ERec
@@ -109,9 +123,19 @@ lemma l₃ : typed Γ exp₃ type₃ :=
             exp.EIsZero
             (exp.EVar x)
             ty.TNat
-            ty.TNat
-            sorry
-            sorry
+            ty.TBool
+            (typed.IsZero_typed Γ')
+            (
+              typed.Var_typed
+                Γ'
+                x
+                ty.TNat
+                (
+                  begin
+                  rw (ctx_order_exchangability) -- ℚ: No idea
+                  end
+                )
+            )
         )
         (typed.Zero_typed)
         sorry

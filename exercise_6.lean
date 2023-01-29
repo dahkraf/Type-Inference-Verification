@@ -12,7 +12,7 @@ def Γ₁ : ctx := ctx.ctx_snoc Γ₀ "x" ty.TNat
 def legal₁_exp : exp := exp.ELam "x" ty.TNat (exp.EIsZero)
 lemma legal₁ : (type_infer Γ₀ legal₁_exp) = (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) := sorry
 
-def legal₂_exp : exp := exp.ELam "x" ty.TNat (exp.EIsZero)
+def legal₂_exp : exp := sorry
 lemma legal₂ : (type_infer Γ₀ legal₂_exp) = (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) := sorry
 
 def legal₃_exp : exp := sorry

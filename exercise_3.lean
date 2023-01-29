@@ -61,12 +61,17 @@ def eq_nat : exp :=
 -- Write down the typing judgment as a lemma in Lean and prove it.
 lemma l_eq_nat :
   typed Γ (eq_nat f x y) (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) :=
-  typed.Rec_typed
-    Γ
-    f
-    x
-    ty.TNat
-    (ty.TFun ty.TNat ty.TBool)
-    sorry -- ℚ: How to systematically descend into the expression, apart from manually copying the individual parts of the full function?
-    sorry
+  sorry
+
+  
+-- lemma l_eq_nat :
+--   typed Γ (eq_nat f x y) (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) :=
+--   typed.Rec_typed
+--     Γ
+--     f
+--     x
+--     ty.TNat
+--     (ty.TFun ty.TNat ty.TBool)
+--     sorry -- ℚ: How to systematically descend into the expression, apart from manually copying the individual parts of the full function?
+--     sorry
 ------------

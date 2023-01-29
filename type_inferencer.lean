@@ -55,4 +55,6 @@ def type_infer [decidable_eq ty] : ctx → exp → option ty
                     end
 ------------
 
-#eval type_infer (ctx.ctx_nil) (exp.ETrue) -- requires instance of decidable_eq ty
+-- Sanity check:
+#eval type_infer (ctx.ctx_nil) (exp.ELam "x" ty.TNat (exp.EIsZero))
+#eval some $ ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)
