@@ -21,7 +21,11 @@ eq_nat := λ (x : ℕ),
                 else eq_nat (pred x) (pred y)
 -/
 
-variables (Γ : ctx) (f x y : string) -- ℚ: Why does it fail when using "constants" keyword?
+variables (Γ : ctx)
+
+def f : string := "f"
+def x : string := "x"
+def y : string := "y"
 
 def eq_nat : exp :=
   exp.ERec
@@ -60,18 +64,106 @@ def eq_nat : exp :=
     )
 -- Write down the typing judgment as a lemma in Lean and prove it.
 lemma l_eq_nat :
-  typed Γ (eq_nat f x y) (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) :=
-  sorry
-
-  
--- lemma l_eq_nat :
---   typed Γ (eq_nat f x y) (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) :=
---   typed.Rec_typed
---     Γ
---     f
---     x
---     ty.TNat
---     (ty.TFun ty.TNat ty.TBool)
---     sorry -- ℚ: How to systematically descend into the expression, apart from manually copying the individual parts of the full function?
---     sorry
+  typed Γ eq_nat (ty.TFun ty.TNat (ty.TFun ty.TNat ty.TBool)) :=
+  begin
+  apply typed.Rec_typed,
+  apply typed.Lam_typed,
+  apply typed.EIf_typed,
+  {
+    apply typed.App_typed,
+    {
+      apply typed.IsZero_typed
+    },
+    {
+      apply typed.Var_typed,
+      unfold ctx_lookup,
+      unfold y,
+      unfold x,
+      rw if_neg,
+      unfold f,
+      rw if_neg,
+      {
+        rw if_pos,
+        exact rfl
+      },
+      {
+        cc
+      },
+      {
+        cc
+      }
+    }
+  },
+  {
+    apply typed.EIf_typed,
+    {
+      apply typed.App_typed,
+      {
+        apply typed.IsZero_typed
+      },
+      {
+        apply typed.Var_typed,
+        unfold ctx_lookup,
+        unfold y,
+        rw if_pos,
+        exact rfl
+      }
+    },
+    {
+      apply typed.True_typed
+    },
+    {
+      apply typed.False_typed
+    }
+  },
+  {
+    apply typed.EIf_typed,
+    {
+      apply typed.App_typed,
+      apply typed.IsZero_typed,
+      apply typed.Var_typed,
+      unfold ctx_lookup,
+      unfold y,
+      rw if_pos,
+      exact rfl
+    },
+    {
+      apply typed.False_typed
+    },
+    {
+      apply typed.App_typed,
+      {
+        apply typed.App_typed,
+        apply typed.Var_typed,
+        unfold ctx_lookup,
+        unfold y,
+        unfold f,
+        rw if_neg,
+        rw if_pos,
+        { exact rfl },
+        { cc },
+        {
+          apply typed.App_typed,
+          apply typed.Pred_typed,
+          apply typed.Var_typed,
+          unfold ctx_lookup,
+          unfold y,
+          unfold x,
+          rw if_neg,
+          {
+            unfold f,
+            rw if_neg,
+            rw if_pos,
+            exact rfl,
+            cc
+          },
+          { cc }
+        }
+      },
+      {
+        sorry -- → Eh?
+      }
+    }
+  }
+  end
 ------------

@@ -7,9 +7,11 @@ Implement a type inferencer.
 def type_infer [decidable_eq ty] : ctx → exp → option ty
 | Γ (exp.EVar x) := ctx_lookup x Γ
 | Γ (exp.ELam x A e) := let Γ' : ctx := (ctx.ctx_snoc Γ x A) in
-                        bind (type_infer Γ' e) (λ o, ty.TFun A o)
+                        let output_type : option ty := (type_infer Γ' e) in
+                        bind (output_type) (λ o, ty.TFun A o)
 | Γ (exp.ERec f x A B e) := let Γ' : ctx := (ctx.ctx_snoc (ctx.ctx_snoc Γ x A) f (ty.TFun A B)) in
-                            bind (type_infer Γ' e) (λ o, ty.TFun A o)
+                            let output_type : option ty := (type_infer Γ' e) in
+                            bind (output_type) (λ o, ty.TFun A o)
 | Γ (exp.EApp e1 e2) := let input_type : option ty := (type_infer Γ e2) in
                         let output_type : option ty := (type_infer Γ e1) in
                         match output_type with
