@@ -69,7 +69,7 @@ lemma l_eq_nat :
   apply typed.Rec_typed,
   apply typed.Lam_typed,
   apply typed.EIf_typed,
-  {
+  { -- x == 0
     apply typed.App_typed,
     {
       apply typed.IsZero_typed
@@ -118,7 +118,7 @@ lemma l_eq_nat :
   },
   {
     apply typed.EIf_typed,
-    {
+    { -- y == 0
       apply typed.App_typed,
       apply typed.IsZero_typed,
       apply typed.Var_typed,
@@ -161,7 +161,16 @@ lemma l_eq_nat :
         }
       },
       {
-        sorry -- → Eh?
+        apply typed.App_typed,
+        {
+          apply typed.Pred_typed
+        },
+        {
+          apply typed.Var_typed,
+          unfold ctx_lookup,
+          rw if_pos,
+          exact rfl
+        }
       }
     }
   }

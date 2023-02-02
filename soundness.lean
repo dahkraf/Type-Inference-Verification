@@ -100,7 +100,7 @@ lemma sound_in_empty_ctx (e : exp) (A : ty) : type_infer (ctx.ctx_nil) e = optio
       },
       {
         -- ELam
-        sorry -- Do cases A to make sure it's a function type
+        sorry
       },
       {
         -- ERec
