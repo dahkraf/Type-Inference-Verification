@@ -4,14 +4,46 @@ import .base_language
 # Exercise 4
 Implement a type inferencer.
 -/
+
+def elam_helper : option ty → option ty
+| (some A) := some A
+| none := none
+
+-- def eif_helper : option ty → option ty
+-- | (some ty.TBool) :=
+--     match if_branch_type, else_branch_type with
+--     | (some A), (some B) := if (A = B) then (some A) else none
+--     | _, _ := none
+--     end
+-- | _ := none
+-- end
+-- ℚ: No idea how to pattern match as an expression!
+
 def type_infer [decidable_eq ty] : ctx → exp → option ty
 | Γ (exp.EVar x) := ctx_lookup x Γ
-| Γ (exp.ELam x A e) := let Γ' : ctx := (ctx.ctx_snoc Γ x A) in
-                        let output_type : option ty := (type_infer Γ' e) in
-                        bind (output_type) (λ o, ty.TFun A o)
-| Γ (exp.ERec f x A B e) := let Γ' : ctx := (ctx.ctx_snoc (ctx.ctx_snoc Γ x A) f (ty.TFun A B)) in
-                            let output_type : option ty := (type_infer Γ' e) in
-                            bind (output_type) (λ o, ty.TFun A o)
+| Γ (exp.ELam x A e) := (
+                            λ Γ' : ctx,
+                                (
+                                    (
+                                        λ output_type : option ty,
+                                            (elam_helper output_type)
+                                    )
+                                    (type_infer Γ' e)
+                                )
+                        )
+                        (ctx.ctx_snoc Γ x A)
+| Γ (exp.ERec f x A B e) := 
+                            (
+                            λ Γ' : ctx,
+                                (
+                                    (
+                                        λ output_type : option ty,
+                                            bind (output_type) (λ o, some (ty.TFun A o))
+                                    )
+                                    (type_infer Γ' e)
+                                )
+                        )
+                        (ctx.ctx_snoc (ctx.ctx_snoc Γ x A) f (ty.TFun A B))
 | Γ (exp.EApp e1 e2) := let input_type : option ty := (type_infer Γ e2) in
                         let output_type : option ty := (type_infer Γ e1) in
                         match output_type with
@@ -35,6 +67,28 @@ def type_infer [decidable_eq ty] : ctx → exp → option ty
                               end
                           | _ := none
                           end
+                          /-
+                          Alternative:
+                          (
+                            λ cond_type : option ty,
+                                (
+                                    (
+                                        λ if_branch_type : option ty,
+                                            (
+                                                (
+                                                    λ else_branch_type : option ty,
+                                                        (
+                                                            eif_helper
+                                                        )
+                                                )
+                                                (type_infer Γ e3)
+                                            )
+                                    )
+                                    (type_infer Γ e2)
+                                )
+                          ) 
+                          ((type_infer Γ e1))
+                          -/
 | Γ (exp.Ezero) := some ty.TNat
 | Γ (exp.ESucc) := some (ty.TFun ty.TNat ty.TNat)
 | Γ (exp.EPred) := some (ty.TFun ty.TNat ty.TNat)
