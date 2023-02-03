@@ -100,15 +100,454 @@ lemma sound_in_empty_ctx (e : exp) (A : ty) : type_infer (ctx.ctx_nil) e = optio
       },
       {
         -- ELam
-        sorry
+        cases A,
+        {
+          unfold type_infer at e_inf,
+          unfold bind at e_inf,
+          cases (type_infer (ctx.ctx_nil.ctx_snoc e_x e_A) e_e), -- Infer the body and match on the resulting type. Unsure about this step, but it seems to type check so far
+          { 
+            unfold option.bind at e_inf,
+            cc
+          },
+          { 
+            cases val,
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            }
+          }
+        },
+        {
+          unfold type_infer at e_inf,
+          unfold bind at e_inf,
+          cases (type_infer (ctx.ctx_nil.ctx_snoc e_x e_A) e_e),
+          { 
+            unfold option.bind at e_inf,
+            cc
+          },
+          { 
+            cases val,
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            }
+          }
+        },
+        {
+          unfold type_infer at e_inf,
+          unfold bind at e_inf,
+          cases (type_infer (ctx.ctx_nil.ctx_snoc e_x e_A) e_e),
+          {
+            unfold option.bind at e_inf,
+            cc
+          },
+          {
+            cases val,
+            {
+              unfold option.bind at e_inf,
+              sorry -- No idea...
+            },
+            {
+              unfold option.bind at e_inf,
+              sorry
+            },
+            {
+              unfold option.bind at e_inf,
+              sorry
+            },
+            {
+              unfold option.bind at e_inf,
+              sorry
+            }
+          }
+        },
+        {
+          unfold type_infer at e_inf,
+          unfold bind at e_inf,
+          cases (type_infer (ctx.ctx_nil.ctx_snoc e_x e_A) e_e),
+          { 
+            unfold option.bind at e_inf,
+            cc
+          },
+          { 
+            cases val,
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              unfold option.bind at e_inf,
+              cc
+            }
+          }
+        }
       },
       {
         -- ERec
-        sorry -- Do cases A to make sure it's a function type
+        cases A,
+        {
+          unfold type_infer at e_inf,
+          unfold bind at e_inf,
+          cases (type_infer (ctx.ctx_nil.ctx_snoc e_x e_A) e_e), -- Infer the body and match on the resulting type. Unsure about this step, but it seems to type check so far
+          { 
+            cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+            { 
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              cases val,
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            }
+          },
+          { 
+            cases val,
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            }
+          }
+        },
+        {
+          unfold type_infer at e_inf,
+          unfold bind at e_inf,
+          cases (type_infer (ctx.ctx_nil.ctx_snoc e_x e_A) e_e), -- Infer the body and match on the resulting type. Unsure about this step, but it seems to type check so far
+          { 
+            cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+            { 
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              cases val,
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            }
+          },
+          { 
+            cases val,
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            }
+          }
+        },
+        {
+          unfold type_infer at e_inf,
+          unfold bind at e_inf,
+          cases (type_infer (ctx.ctx_nil.ctx_snoc e_x e_A) e_e), -- Infer the body and match on the resulting type. Unsure about this step, but it seems to type check so far
+          { 
+            cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+            { 
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              cases val,
+              {
+                unfold option.bind at e_inf,
+                sorry -- Same as on line #172
+              },
+              {
+                unfold option.bind at e_inf,
+                sorry
+              },
+              {
+                unfold option.bind at e_inf,
+                sorry
+              },
+              {
+                unfold option.bind at e_inf,
+                sorry
+              }
+            }
+          },
+          { 
+            cases val,
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                sorry
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                sorry
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                sorry
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                sorry
+              }
+            }
+          }
+        },
+        {
+          unfold type_infer at e_inf,
+          unfold bind at e_inf,
+          cases (type_infer (ctx.ctx_nil.ctx_snoc e_x e_A) e_e), -- Infer the body and match on the resulting type. Unsure about this step, but it seems to type check so far
+          { 
+            cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+            { 
+              unfold option.bind at e_inf,
+              cc
+            },
+            {
+              cases val,
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            }
+          },
+          { 
+            cases val,
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            },
+            {
+              cases (type_infer ((ctx.ctx_nil.ctx_snoc e_x e_A).ctx_snoc e_f (e_A.TFun e_B)) e_e),
+              {
+                unfold option.bind at e_inf,
+                cc
+              },
+              {
+                unfold option.bind at e_inf,
+                cc
+              }
+            }
+          }
+        }
       },
       {
         -- EApp
-        sorry
+        sorry -- ℚ: No idea how to proceed
+        -- cases A,
+        -- {
+        --   unfold type_infer at e_inf,
+        --   cases (type_infer ctx.ctx_nil e_e2),
+        --   {
+        --     cases (type_infer ctx.ctx_nil e_e1),
+        --     {
+        --       sorry
+        --     },
+        --     [sorry]
+        --   },
+        --   {
+        --     sorry
+        --   }
+        -- }
       },
       {
         -- ETrue
