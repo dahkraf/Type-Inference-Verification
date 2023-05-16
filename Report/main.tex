@@ -1,0 +1,349 @@
+\documentclass{article}
+% Packages:
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\bibliographystyle{plain}
+% Code listings:
+\definecolor{mygray}{gray}{0.92}
+\lstset{frame=tb,
+  aboveskip=3mm,
+  belowskip=1mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  backgroundcolor = \color{mygray},
+  numbers=none,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+% No indentation on new paragraphs:
+\setlength\parindent{0pt}
+% Formatting:
+\usepackage[compact]{titlesec}
+\usepackage[margin=1.5in]{geometry}
+\titleformat{\section}[display]
+{\Large\scshape\raggedright}{}{0pt}{}[\titlerule] 
+% New commands:
+\newcommand{\tt}[1]{\texttt{#1}}
+
+\title{Software Verification Project Report}
+\author{Farhad Azimzade 4788206}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This topic of this project is formalising and proving certain properties of a type inferencer for a small domain-specific functional language. The main parts involve the typing rules, the type checker, and the corresponding soundness and completeness rules for the type system. The language contains constructs like anonymous functions, recursive functions, natural numbers, booleans, and with the extension, the product type.
+
+% [\textcolor{red}{!! TODO !!}]
+
+\section{Code Overview}
+The code for this project is spread across several files, one of which is the base language definition and the others refer to individual exercises:
+\begin{itemize}
+\item \textbf{base\_language.lean} $\to$ core language definitions (i.e. $ty$, $exp$, and $ctx$) and the context lookup function.
+\item \textbf{typing\_rules.lean} $\to$ inductive typing that models the typing judgements of the object language.
+\item \textbf{exercise\_2.lean}
+\item \textbf{exercise\_3.lean}
+\item \textbf{type\_inferencer.lean} $\to$ function producing the type of an expression in the object language.
+\item \textbf{exercise\_6.lean}
+\item \textbf{completeness\_.lean} $\to$ theorems regarding completeness of the typing rules and the type checker.
+\item \textbf{soundness\_.lean} $\to$ theorems regarding soundness of the typing rules and the type checker.
+\end{itemize}
+
+\textbf{Note}: Since exercise 5 is not a coding exercise, it only appears in the report.
+
+\section{Exercises}
+\subsection{Exercise 1: Typing Judgements}
+Exercise 1 requires representing the typing judgment $\Gamma \vdash e : A$ as an inductively defined proposition. The idea is to create constructors for the inductive type \texttt{typed} that would produce proofs of a typing judgement for each expression constructor in the language.
+
+% [\textcolor{red}{!! TODO !!}]
+
+\subsection{Exercise 2}
+
+% [\textcolor{red}{!! TODO !!}]
+
+In proving lemmas from Exercise 2, a few insights could be extracted. Firstly, the {\tt{cc}} tactic can be used to prove inequalities in the goal. For example, in the proof if ${\tt{lemma}}_3$, at one stage, the goal is $\vdash \neg \: ("f" = "x")$. Here, the two string literals are unequal, and the {\tt{cc}} tactic allows proving this fact. \\
+
+Secondly, because the lemmas rely on defined objects, such as the context, object language types, and strings for the variables, those need to be either defined as constants at the top of the file or added to the lemmas as arguments. Given the style suggestion in the project description, these identifiers need to be introduced at the beginning outside the lemmas. However, lemmas that rely on constants become non-computable and are required to be annotated by a $noncomputable$ keyword. Presumably, since constants do not have explicit values, any function dependent on them cannot be evaluated, only type checked. \\
+
+Instead, it seems better to provide the identifiers alongside explicit definitions, such as ${\tt{def}} \; {\tt{x}} : string := "x"$. This way, the identifiers used in the lemmas have explicity definitions, which drops Lean's requirement for the non-computability property to be annotated. \\
+
+Another reason for defining identifiers with immediate string literals is that equality and inequality of strings can be easily invoked on there identifiers. For example, a goal with an if-statement over two string identifiers, $x$ and $y$, like:
+\begin{equation*}
+    \Gam \vdash {\tt{ite}} \; (x = y) \; (...) \; (...)
+\end{equation*}
+can be unfolded and then computed using the {\tt{unfold}} and {\tt{rw}} tactics: \\
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Unfolding to string literals.}, captionpos=b, label={lst:ite_unfold}]
+...
+unfold x, -- $\Gamma \vdash {\tt{ite}} \; ("x" = y) \; (branch_1) \; (branch_2)$
+unfold y, -- $\Gamma \vdash {\tt{ite}} \; ("x" = "y") \; (branch\1) \; (branch_2)$
+rw if_neg, -- $\Gamma \vdash branch_2$
+...
+\end{lstlisting}
+\end{minipage} \\
+
+where each 
+
+\subsection{Exercise 3}
+Using the syntax of the object language, a function that compares two natural numbers for equality can be defined as in the pseudocode in Listing \ref{lst:eq_nat}. \\
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Function for comparing natural numbers for equality.}, captionpos=b, label={lst:eq_nat}]
+def eq_nat : exp :=
+    $\lambda$ (x : $\mathbb{N}$),
+        $\lambda$ (y : $\mathbb{N}$),
+            if (x == 0)
+            then
+                if (y == 0)
+                then "true"
+                else "false"
+             else
+                if (y == 0)
+                then "false"
+                else eq_nat (pred x) (pred y)
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Exercise 4: Type Inference}
+
+% \textcolor{blue}{!! SHORT INTRO TO TYPE INFERENCER !!}
+
+\subsubsection{{\tt{let}} Bindings vs. Anonymous Lambda Applications}
+
+Initially, I defined all cases of expressions for the type checker using the more readable style with {\tt{let}} bindings for my intermediate variables. For example, the initial definition for the case ${\tt{ELam \; x}} \; A \; {\tt{e}}$ is provided in Listing \ref{lst:lam_infer_old}.\\
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Initial type inference definition for {\tt{ELam}}} {\tt{x}}, captionpos=b, label={lst:lam_infer_old}]
+| $\Gamma$ (exp.ELam x A e) := let $\Gamma$' : ctx := (ctx.ctx_snoc $\Gamma$ x A) in
+                           let output_type : option ty := (type_infer $\Gamma$' e) in
+                           bind (output_type) ($\lambda$ o, some (ty.TFun A o))
+\end{lstlisting} 
+\end{minipage}
+
+However, as I proceeded to prove test lemmas in Exercise 6, I noticed that Lean did not automatically unfold the definitions within the variables introduced by {\tt{let}}. This could be due to the property of {\tt{let}} bindings not being subject to reduction rules, as per the book. This is contrast to $\lambda$-expressions, which are indeed reduced automatically. In order to utilise this property, I converted my definitions from {\tt{let}} bindings to anonymous functions (Listing \ref{lst:lam_infer_new}). \\
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Updated type inference definition for {\tt{ELam}}.}, captionpos=b, label={lst:lam_infer_new}]
+| $\Gamma$ (exp.ELam x A e) := 
+                        (
+                            $\lambda$ $\Gamma$' : ctx,
+                                (
+                                    (
+                                        $\lambda$ output_type : option ty,
+                                            bind (output_type) ($\lambda$ o, some (ty.TFun A o))
+                                    )
+                                    (type_infer $\Gamma$' e)
+                                )
+                        )
+                        (ctx.ctx_snoc $\Gamma$ x A)
+\end{lstlisting}
+\end{minipage} \\
+
+Having assumed that all of my initial definitions would need to be rewritten using raw lambdas, I decided to use a more monadic style for the definitions. For instance, the case for ${\tt{EIf}}$ in the type checker is in Listing \ref{lst:monadic_eif}. \\
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Updated type inference definition for {\tt{EIf}}.}, captionpos=b, label={lst:monadic_eif}]
+| $\Gamma$ (exp.EIf e1 e2 e3) :=
+    bind (type_infer $\Gamma$ e1)
+    ($\lambda$ cond_type,
+        if (cond_type = ty.TBool)
+        then (
+            bind (type_infer $\Gamma$ e2)
+            ($\lambda$ if_branch_type,
+                bind (type_infer $\Gamma$ e3)
+                ($\lambda$ else_branch_type,
+                    if (if_branch_type = else_branch_type)
+                    then some if_branch_type
+                    else none
+                )
+            )
+        )
+        else none
+\end{lstlisting}
+\end{minipage} \\
+
+Ultimately, however, the choice of approach to definitions did not matter for the proofs about the type checker. While I could not unfold the definitions further for the definitions, Lean managed to perform all the necessary reductions in all 3 different implementations when using the reflexive tactic ${\tt{exact}} \; {\tt{rfl}}$. Via the specified conversion rules, definitions using ${\tt{let}}$s, raw lambdas, and monadic binding could all be reduced and the appropriate equality inferred. \\
+
+\subsubsection{Equality of Types $ty$}
+One issue in the implementation of type inference is the comparison of object language types $ty$. For example, when type checking a function application {\tt{EApp} e1 e2} (\ref{lst:type_infer_eapp}), the type of the argument ${\tt{e2}} : T$ has to be equal to the input type of the function ${\tt{e1}} : TFun \; A \to B$ . This means that within the type checker, a comparison $A = T$ has to be performed.
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Type inference of {\tt{EApp}}.}, captionpos=b, label={lst:type_infer_eapp}]
+| $\Gamma$ (exp.EApp e1 e2) := let input_type : option ty := (type_infer $\Gamma$ e2) in
+                           let output_type : option ty := (type_infer $\Gamma$ e1) in
+                           match output_type with
+                           | (some (ty.TFun A B)) :=
+                              match input_type with
+                              | (some T) := if (A = T) then (some B) else none
+                              | _ := none
+                              end
+                           | _ := none
+                           end
+\end{lstlisting}
+\end{minipage} \\
+
+In order to use the equality proposition $p : A = T$, where $A, T : ty$, as the condition of an if-expression in Lean, this proposition needs to be shown to be decidable. Presumably, once a proposition is shown to be decidable, it can act as a boolean, since it can then only take on values $\{true, false\}$. Otherwise, an undecidable proposition can also be a non-terminating computation. \\
+
+Decidability of equality over the object language types $ty$ can be shown by introducing an instance of $decidable\_eq \; ty$. The instance is defined in Listing \ref{lst:decidable_eq_ty}. \\
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Instance of decidability of equlity of $ty$.}, captionpos=b, label={lst:decidable_eq_ty}]
+instance decidable_eq_ty : decidable_eq ty :=
+$\lambda$ (A B : ty),
+    match A, B with
+    | ty.TNat, ty.TNat := is_true rfl
+    | ty.TBool, ty.TBool := is_true rfl
+    | (ty.TFun A B), (ty.TFun C D) := $\textcolor{red}{\texttt{sorry}}$
+    | (ty.TProd A B), (ty.TProd C D) := $\textcolor{red}{\texttt{sorry}}$
+    | _, _ := is_false $\textcolor{red}{\texttt{sorry}}$
+    end
+\end{lstlisting}
+\end{minipage} \\
+
+However, I had difficulty in completing the definition in \ref{lst:decidable_eq_ty} for function and product types and in ruling out all other combinations. Instead, as I later found out, a trivial instance of decidable equality over a type can be derived automatically by Lean. In order to achieve this, the main definition of the inductive type $ty$ should be adjusted by annotating it with a $\tt{derive}$ tag (\ref{lst:instance_of_decidable}). \\
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Instance of decidability of equlity of $ty$ using {\tt{derive}} tag.}, captionpos=b, label={lst:instance_of_decidable}]
+@[derive decidable_eq] inductive ty : Type
+| TNat : ty
+| TBool : ty
+| TFun : ty $\to$ ty $\to$ ty
+| TProd : ty $\to$ ty $\to$ ty
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Exercise 5}
+\begin{itemize}
+    \item $\mathbb{Q}$: Explain the difference between the typing judgment typed and the type inferencer \texttt{type\_infer}.
+    \\
+    
+    $\mathbb{A}$: Typing judgement $\texttt{typed} \; \Gamma \; e \; A$ is a syntactic statement about the type system, whereas the type checker provides the semantics of the type system. The two are very closely related.
+
+    According to Pierce \cite{Pierce2002TypesAP}, "the typing rules tell us that terms of certain forms are well typed under certain conditions, but by looking at an individual typing rule, we can never conclude that some term is not well typed, since it is always possible that another rule could be used to type this term."
+
+    On the other hand, the type checker allows to determine the type of a given syntactic form of the language (i.e. expression ${\tt{e}} : exp$). In particular, the type checker can also inform us whether an expression is ill-typed.
+    
+    \item $\mathbb{Q}$: Explain why the type annotations $A$ and $B$ in lambda abstractions $\lambda (x : A). e$ and recursive functions $\texttt{rec}  \; f \; (x : A) : B := e$ are needed for the implementation of your type inferencer. Explain if they are also needed to describe the typing rules.
+    \\
+    
+    $\mathbb{A}$: Type annotations for the input and output types of anonymous functions need to be known when inferring the types of these functions, because the input/output types have to be added to the current context in order to evaluate the bodies of the functions. For example, in an expression ${\tt{f}} := \lambda {\tt{x}}, {\tt{x}} + 1$, the type of the parameter {\tt{x}} has to be determined in order to type check the overall function as ${\tt{f}} : Nat \to Nat$. \\
+    
+    However, it can still be possible to determine the function type without the type annotation ${\tt{x}} : Nat$. This requires more sophisticated mechanics of type inference that would resolve constraints that the operations within the function body impose on the parameter {\tt{x}}. \\
+
+    Similarly, for the recursive functions, the overall type of the function of the function needs to be known prior to type checking the body, since the body may use the function name as a variable in its context. \\
+    
+\end{itemize}
+
+\subsection{Exercise 7: Soundness and Completeness}
+
+\subsubsection{Soundness}
+Soundness refers to the correctness of all type checking definitions. That is, obtaining a certain type for a given expression in the object language implies that the corresponding typing judgement can be derived using the typing rules. So, the hypothesis in the proof is the type evaluation ${\tt{type\_infer}} \; \Gamma \; {\tt{e}} = A \to \Gamma \vdash {\tt{e}} : A$ of an expression ${\tt{e}} : exp$. \\
+
+For readability, soundness proof is constructed using two sub-proofs, each of which tackles one context case. The proof {\tt{sound\_in\_empty\_ctx}}, as the name suggest proves that the type system is sound when evaluated in an empty context. Proof {\tt{sound\_in\_non\_empty\_ctx}} does so in a non-empty context. Furthermore, the general structure of the proofs follows a style of pattern matching, whereby once the proof was split by ${\tt{cases}}$ into two cases for its two constructors, each was further split into cases based on the expression ${\tt{e}}$. \\
+
+The key insight in soundness proof appears to be the usage of the ${\tt{unfold}} ... {\tt{at}} ...$ tactic, which preforms one step of the defined computation at the level of hypothesis. This way, insights into the typing judgement could be derived from the hypothesis that the expression in question has been evaluated to type $A : ty$. \\
+
+One such common pattern in the soundness proof is unfolding the hypothesis and allowing ${\tt{cc}}$ tactic to derive the desire conclusion from the contradiction within the untrue hypothesis. For example, the proof of soundness for the empty context is in Listing \ref{lst:soundness_etrue}. \\
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[mathescape = true, caption={Snippet of the soundness proof in an empty context showing the case for ${\tt{ETrue}}$.}, captionpos=b, label={lst:soundness_etrue}]
+lemma sound_in_empty_ctx (e : exp) (A : ty) : type_infer (ctx.ctx_nil) e = option.some A $\to$ typed (ctx.ctx_nil) e A :=
+  $\lambda$ e_inf : type_infer (ctx.ctx_nil) e = option.some A,
+    begin
+      cases e,
+      { ... }
+      ...
+      { -- ETrue
+        cases A,
+        { -- A = TNat
+          unfold type_infer at e_inf,
+          cc
+        },
+        { -- A = TBool
+          apply typed.True_typed
+        },
+        { -- A = TFun _ _
+          unfold type_infer at e_inf,
+          cc
+        },
+        { -- A = TProd _ _
+          unfold type_infer at e_inf,
+          cc
+        }
+      }
+      ...
+      { ... }
+\end{lstlisting}
+\end{minipage} \\
+
+% [\textcolor{red}{!! TODO !!}]
+
+\subsection{Extension: Product Type}
+The extension I attempted adding is the tuple construction, which includes:
+\begin{itemize}
+    \item new product type $A \times B$
+    \item pairing function $\texttt{pair} : A \to B \to A \times B$
+    \item left projection $\texttt{fst} : A \times B \to A$
+    \item right projection $\texttt{fst} : A \times B \to B$
+\end{itemize}
+
+One of the desired properties of the pairing function and the projections is partial applicability. This means, that individual expressions $\tt{pair}$, $\tt{fst}$, and $\tt{snd}$ should be valid standalone expressions in the object language. This way, they can be passed around as arguments and curried. \\
+
+To achieve this, these three constructions could be defined similarly to the successor function {\tt{ESucc}} $ : exp$. Encoding them this way, means that the typing judgements over the pair functions can be:
+\begin{align*}
+    &\dfrac{}{\Gamma \vdash {\tt{Pair}} : Fun \; A \; (Fun \; B \; (Prod \; A \; B)) } \\
+    &\dfrac{}{\Gamma \vdash {\tt{Fst}} : Fun \; ((Prod \; A \; B)) \; A}  \\
+    &\dfrac{}{\Gamma \vdash {\tt{Snd}} : Fun \; ((Prod \; A \; B)) \; B}
+\end{align*}
+
+However, as I proceeded to implement type inferencer for these new constructs, I had an issue with inferring the types of the subexpressions, since those are not available in the current definition. Unlike expressions that deal with natural numbers exclusively, such as ${\tt{ESucc}} : Nat \to Nat$, the overall type of the {\tt{Pair}} function depends on the types of the arguments that will be provided. This means that the type of {\tt{Pair}} cannot be inferred directly using the current definition. \\
+
+In order to have access to the types of the subexpressions (arguments), I have redefined the pairing functions to require arguments to be applied immediately, like so:
+\begin{align*}
+    &{\tt{Pair}} : exp \to exp \to exp \\
+    &{\tt{Fst}} : exp \to exp \\
+    &{\tt{Snd}} : exp \to exp 
+\end{align*}
+This means that the pairing functions are no longer standalone expressions in the language. For example, the following judgement involving partial application of {\tt{Pair}} can no longer be derived:
+\begin{align*}
+    &\dfrac{}{\Gamma \vdash \lambda ({\tt{x}} : A), \; {\tt{Pair}} \; {\tt{x}} \; : \; Fun \; A \; (Fun \; B \; (Prod \; A \; B))}
+\end{align*}
+However, an equivalent expression can still be defined, albeit in a somewhat more cumbersome way, meaning that there is no apparent negative effect on the expressivity of the object language. In this case, an equivalent that does not require curried {\tt{Pair}} could be:
+\begin{align*}
+    &\dfrac{}{\Gamma \vdash \lambda ({\tt{x}} : A), \; \lambda ({\tt{y}} : B), \; {\tt{Pair}} \; {\tt{x}} \; {\tt{y}} \; : \; Fun \; A \; (Fun \; B \; (Prod \; A \; B))}
+\end{align*}
+
+Defining pairing functions in such a limiting way is unfortunate. I could not find a workaround that would enable both curried pairing functions and allow for type checking them. It seems that the base object language may need to be modified further to accommodate that, perhaps by adding a construction for a generic type $Type : ty$ to act as a placeholder inside $Prod : ty \to ty \to ty$.
+
+% \section{Conclusion}
+
+% Overall, Lean does at first appear straightforward, especially given some experience with functional programming in Haskell and some limited exposure to Agda. However, there are certain language quirks that did not seem apparent to me. \\
+
+% One quirk I encountered early on was defining recursive functions, whereby two seemingly identical definitions were treated differently by Lean. In particular, when defining a recursive function $f$:
+
+% \begin{lstlisting}[mathescape = true, caption={Instance of decidability of equlity of $ty$.}, captionpos=b, label={lst:decidable_eq_ty}]
+% instance decidable_eq_ty : decidable_eq ty :=
+% $\lambda$ (A B : ty),
+%     match A, B with
+%     | ty.TNat, ty.TNat := is_true rfl
+%     | ty.TBool, ty.TBool := is_true rfl
+%     | (ty.TFun A B), (ty.TFun C D) := $\textcolor{red}{\texttt{sorry}}$
+%     | (ty.TProd A B), (ty.TProd C D) := $\textcolor{red}{\texttt{sorry}}$
+%     | _, _ := is_false $\textcolor{red}{\texttt{sorry}}$
+%     end
+% \end{lstlisting}
+
+\bibliography{references}
+
+\end{document}
